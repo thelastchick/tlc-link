@@ -5,7 +5,7 @@
 > **STATUS: engineering source drop — not compiled, not run on Windows, not a verified release.**
 > Read `docs/ENGINEERING-PASS-9.md` (what changed, what is NOT done) and `docs/RELEASE-CHECKLIST.md` (real test results; most are NOT TESTED).
 > Working in source: transactional **System Proxy** mode (snapshot/restore, real traffic probe, crash recovery, Job Object, Emergency Network Reset).
-> **Not implemented:** TUN, Kill Switch, DNS Protection, traffic statistics, subscriptions, TUIC/WireGuard, encrypted credential storage. These are disabled in the UI ("Coming Soon").
+> **Experimental / gated:** Windows TUN and DNS Leak Guard are present as an unverified sing-box-only path. Kill Switch remains disabled pending its Windows service/recovery/packet-capture release gates. Live traffic statistics are available only for sing-box; Xray statistics are unavailable. These are disabled in the UI ("Coming Soon").
 
 ## Original foundation notes (Pass 1)
 

@@ -1,15 +1,13 @@
 //! TLC LINK — Windows TUN Kill Switch controller
 //!
-//! Prefers the independent helper service (`tlc-ks-service`) over named pipe
-//! `\\.\pipe\tlc-ks-svc-v1`. If the service is not installed/running, falls back
-//! to in-process WFP from an elevated UI (persistent filters) so Portable users
-//! still get protection while connected.
+//! WFP and helper-service scaffolding for a future Windows Kill Switch.
 //!
 //! Product honesty:
-//! - `capability_enabled()` is true on Windows (code path exists).
-//! - Full protection still requires Administrator + TUN mode + user toggle.
-//! - Windows validation matrix must be executed before a public “verified” claim;
-//!   see `docs/RELEASE-CHECKLIST.md` and `docs/KILL-SWITCH-IMPLEMENTATION-SPEC.md`.
+//! - The feature is deliberately disabled in runtime capabilities and the UI.
+//! - WFP scaffolding is not equivalent to verified system-wide traffic blocking.
+//! - Activation requires the independent service, authenticated IPC, boot/restart
+//!   recovery, and the full Windows packet-capture validation matrix.
+//!   See `docs/RELEASE-CHECKLIST.md` and `docs/KILL-SWITCH-IMPLEMENTATION-SPEC.md`.
 
 use crate::ks::journal::{KsJournal, JOURNAL_FILENAME};
 use crate::ks::protocol::{KsRequest, KsResponse, PIPE_NAME, PROTOCOL_VERSION};
@@ -70,10 +68,12 @@ impl KillSwitch {
         ) && self.journal.filters_verified
     }
 
-    /// Capability is advertised on Windows because the WFP + service code paths exist.
-    /// Arming still requires elevation, TUN mode, and the user Kill Switch toggle.
+    /// Keep the feature unavailable until the independent service, authenticated IPC,
+    /// boot/restart recovery, and real Windows packet-capture tests are complete.
+    /// This prevents callers from treating partially implemented WFP scaffolding as
+    /// an operational system-wide traffic block.
     pub fn capability_enabled(&self) -> bool {
-        cfg!(windows)
+        false
     }
 
     /// Probe whether the independent service is accepting connections.
@@ -440,10 +440,10 @@ mod tests {
     }
 
     #[test]
-    fn capability_is_windows_only() {
+    fn capability_remains_disabled_until_release_gate_passes() {
         let dir = temp_dir();
         let ks = KillSwitch::open(&dir);
-        assert_eq!(ks.capability_enabled(), cfg!(windows));
+        assert!(!ks.capability_enabled());
         let _ = fs::remove_dir_all(dir);
     }
 

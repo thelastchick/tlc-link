@@ -119,7 +119,7 @@
         tun: "System TUN Mode",
         tunSubFull: "sing-box TUN — Windows administrator required",
         ks: "Kill Switch",
-        ksSubFull: "Blocks non-tunnel traffic while TUN is connected (admin required)",
+        ksSubFull: "Unavailable in this build; no system traffic blocking is active.",
         dns: "DNS Leak Guard",
         dnsSubFull: "Requires System TUN; encrypted DoH (Cloudflare + Google + Quad9)",
         logTunRequiresDisconnect: 'Disconnect before changing TUN or DNS settings.',
@@ -227,7 +227,7 @@
         logDisconnectToSwitchCore: "Disconnect first before switching the core.",
         logCoreSelected: "Core selected: {core}",
         logLangSwitched: "Language switched to {lang}",
-        logRoutingSet: "Routing mode set to {mode}",
+        logRoutingSet: "Routing mode selected: {mode}. It will apply on the next connection.",
         logDesktopOnlyReset: "Network reset is only available in the TLC LINK desktop app.",
         confirmNetReset: "Emergency Network Reset\n\nThis will stop the active core and restore Windows proxy settings to their state before TLC LINK. Continue?",
         logResetOk: "Emergency Network Reset completed.",
@@ -308,7 +308,7 @@
         tun: "حالت TUN سیستم",
         tunSubFull: "تونل کامل ویندوز با sing-box — اجرای مدیر لازم است",
         ks: "کلید قطع اضطراری (Kill Switch)",
-        ksSubFull: "مسدود کردن ترافیک خارج از تونل در حالت TUN (نیاز به مدیر)",
+        ksSubFull: "در این نسخه غیرفعال است؛ هیچ مسدودسازی سراسری ترافیک انجام نمی‌شود.",
         dns: "محافظت از نشت DNS",
         dnsSubFull: "نیازمند TUN؛ DoH رمزگذاری‌شده (Cloudflare + Google + Quad9)",
         logTunRequiresDisconnect: 'برای تغییر TUN یا DNS ابتدا اتصال را قطع کنید.',
@@ -420,7 +420,7 @@
         logDisconnectToSwitchCore: "برای تغییر هسته ابتدا اتصال را قطع کنید.",
         logCoreSelected: "هسته انتخاب شد: {core}",
         logLangSwitched: "زبان برنامه به {lang} تغییر یافت",
-        logRoutingSet: "حالت مسیریابی روی {mode} تنظیم شد",
+        logRoutingSet: "حالت مسیریابی {mode} انتخاب شد؛ از اتصال بعدی اعمال می‌شود.",
         logDesktopOnlyReset: "بازنشانی شبکه فقط در نسخه دسکتاپ TLC LINK در دسترس است.",
         confirmNetReset: "بازنشانی اضطراری شبکه\n\nهسته متوقف می‌شود و تنظیمات پروکسی ویندوز به حالت قبل از TLC LINK برمی‌گردد. ادامه می‌دهید؟",
         logResetOk: "بازنشانی شبکه با موفقیت کامل شد.",
@@ -497,7 +497,7 @@
         tun: "وضع TUN للنظام",
         tunSubFull: "نفق TUN كامل عبر sing-box — يتطلب صلاحيات المسؤول",
         ks: "مفتاح الإيقاف (Kill Switch)",
-        ksSubFull: "يحظر المرور خارج النفق أثناء TUN (يتطلب مسؤول)",
+        ksSubFull: "غير متاح في هذا الإصدار؛ لا يتم حظر حركة المرور على مستوى النظام.",
         dns: "حماية تسرب DNS",
         dnsSubFull: "يتطلب TUN؛ DNS مشفر عبر Cloudflare DoH",
         logTunRequiresDisconnect: 'افصل الاتصال قبل تغيير إعدادات TUN أو DNS.',
@@ -609,7 +609,7 @@
         logDisconnectToSwitchCore: "اقطع الاتصال أولاً قبل تغيير النواة.",
         logCoreSelected: "تم اختيار النواة: {core}",
         logLangSwitched: "تم تغيير اللغة إلى {lang}",
-        logRoutingSet: "تم ضبط وضع التوجيه على {mode}",
+        logRoutingSet: "تم اختيار وضع التوجيه {mode}؛ وسيُطبق عند الاتصال التالي.",
         logDesktopOnlyReset: "إعادة ضبط الشبكة متاحة فقط في تطبيق سطح المكتب TLC LINK.",
         confirmNetReset: "إعادة ضبط الشبكة الطارئة\n\nسيتم إيقاف النواة واستعادة إعدادات وكيل ويندوز إلى حالتها قبل TLC LINK. هل تريد المتابعة؟",
         logResetOk: "اكتملت إعادة ضبط الشبكة الطارئة.",
@@ -798,7 +798,7 @@
         logDisconnectToSwitchCore: "切换核心前请先断开连接。",
         logCoreSelected: "已选择核心：{core}",
         logLangSwitched: "语言已切换为 {lang}",
-        logRoutingSet: "路由模式已设为 {mode}",
+        logRoutingSet: "已选择 {mode} 路由模式，将在下次连接时生效。",
         logDesktopOnlyReset: "网络重置仅在 TLC LINK 桌面版中可用。",
         confirmNetReset: "紧急网络重置\n\n将停止当前核心并恢复 Windows 代理设置。是否继续？",
         logResetOk: "紧急网络重置完成。",
@@ -987,7 +987,7 @@
         logDisconnectToSwitchCore: "코어를 변경하려면 먼저 연결을 해제하세요.",
         logCoreSelected: "코어 선택됨: {core}",
         logLangSwitched: "언어가 {lang}(으)로 변경됨",
-        logRoutingSet: "라우팅 모드가 {mode}(으)로 설정됨",
+        logRoutingSet: "라우팅 모드 {mode}을(를) 선택했습니다. 다음 연결부터 적용됩니다.",
         logDesktopOnlyReset: "네트워크 초기화는 TLC LINK 데스크톱 앱에서만 가능합니다.",
         confirmNetReset: "긴급 네트워크 초기화\n\n코어를 중지하고 Windows 프록시 설정을 복원합니다. 계속할까요?",
         logResetOk: "긴급 네트워크 초기화가 완료되었습니다.",
@@ -1176,7 +1176,7 @@
         logDisconnectToSwitchCore: "コアを切り替える前に切断してください。",
         logCoreSelected: "選択したコア: {core}",
         logLangSwitched: "言語を {lang} に切り替えました",
-        logRoutingSet: "ルーティングを {mode} に設定しました",
+        logRoutingSet: "ルーティングモード {mode} を選択しました。次回の接続時に適用されます。",
         logDesktopOnlyReset: "ネットワークリセットはデスクトップ版でのみ利用可能です。",
         confirmNetReset: "緊急ネットワークリセット\n\nコアを停止し、Windowsプロキシ設定を元に戻します。続行しますか？",
         logResetOk: "ネットワークリセットが完了しました。",
@@ -1365,7 +1365,7 @@
         logDisconnectToSwitchCore: "Déconnectez-vous avant de changer de noyau.",
         logCoreSelected: "Noyau sélectionné : {core}",
         logLangSwitched: "Langue changée en {lang}",
-        logRoutingSet: "Routage défini sur {mode}",
+        logRoutingSet: "Mode de routage {mode} sélectionné ; il sera appliqué à la prochaine connexion.",
         logDesktopOnlyReset: "Disponible uniquement dans l'application de bureau.",
         confirmNetReset: "Réinitialisation réseau d'urgence\n\nArrêter le noyau et restaurer le proxy Windows ?",
         logResetOk: "Réinitialisation réseau terminée.",
@@ -1554,7 +1554,7 @@
         logDisconnectToSwitchCore: "Disconnettiti prima di cambiare core.",
         logCoreSelected: "Core selezionato: {core}",
         logLangSwitched: "Lingua cambiata in {lang}",
-        logRoutingSet: "Modalità routing impostata su {mode}",
+        logRoutingSet: "Modalità {mode} selezionata; verrà applicata alla prossima connessione.",
         logDesktopOnlyReset: "Disponibile solo nell'app desktop TLC LINK.",
         confirmNetReset: "Ripristino Rete di Emergenza\n\nArrestare il core e ripristinare il proxy Windows?",
         logResetOk: "Ripristino rete completato.",
@@ -1743,7 +1743,7 @@
         logDisconnectToSwitchCore: "Çekirdek değiştirmeden önce bağlantıyı kesin.",
         logCoreSelected: "Seçilen çekirdek: {core}",
         logLangSwitched: "Dil {lang} olarak değiştirildi",
-        logRoutingSet: "Yönlendirme modu {mode} olarak ayarlandı",
+        logRoutingSet: "{mode} yönlendirme modu seçildi; bir sonraki bağlantıda uygulanacak.",
         logDesktopOnlyReset: "Ağ sıfırlama yalnızca masaüstü uygulamasında kullanılabilir.",
         confirmNetReset: "Acil Ağ Sıfırlama\n\nÇekirdek durdurulacak ve Windows proxy ayarları geri yüklenecek. Devam edilsin mi?",
         logResetOk: "Acil Ağ Sıfırlama tamamlandı.",
@@ -2359,6 +2359,8 @@
     // ---------- 7a. Live traffic meters (sing-box Clash API) ----------
     let trafficTimer = null;
     let trafficPrev = null; // { up, down, t }
+    let trafficPollBusy = false;
+    let trafficPollGeneration = 0;
     function formatBytes(n) {
       n = Number(n) || 0;
       if (n < 1024) return n.toFixed(0) + " B";
@@ -2387,15 +2389,23 @@
       }
     }
     function stopTrafficPoll() {
+      trafficPollGeneration++;
       if (trafficTimer) { clearInterval(trafficTimer); trafficTimer = null; }
       setTrafficVisible(false);
     }
     async function pollTrafficOnce() {
       const invoke = window.__TAURI__?.core?.invoke;
       if (!invoke || !state.coreRunning) { setTrafficVisible(false); return; }
+      // setInterval can fire again before a slow IPC/API request completes.
+      // Serialize polls and discard responses belonging to an old session.
+      if (trafficPollBusy) return;
+      trafficPollBusy = true;
+      const generation = trafficPollGeneration;
       try {
         const snap = await invoke("traffic_snapshot");
+        if (generation !== trafficPollGeneration || !state.coreRunning) return;
         if (!snap || !snap.available) {
+          trafficPrev = null;
           setTrafficVisible(state.coreRunning);
           const d = document.getElementById("traffic-down");
           const u = document.getElementById("traffic-up");
@@ -2421,7 +2431,18 @@
           up: formatBytes(snap.upload_total)
         });
       } catch (_) {
-        // Silent: API may not be ready in the first second after connect.
+        // Keep the meter visible while the core is running. A transient local
+        // API failure must not look like the whole statistics panel vanished.
+        setTrafficVisible(true);
+        const d = document.getElementById("traffic-down");
+        const u = document.getElementById("traffic-up");
+        const tot = document.getElementById("traffic-totals");
+        if (d) d.textContent = "—";
+        if (u) u.textContent = "—";
+        if (tot) tot.textContent = t("trafficUnavailable");
+        trafficPrev = null;
+      } finally {
+        trafficPollBusy = false;
       }
     }
     function startTrafficPoll() {
@@ -2606,11 +2627,15 @@
       }
       if (!canTun) { state.tun = false; state.dnsGuard = false; state.killSwitch = false; }
       if (!canDns) state.dnsGuard = false;
-      if (state.dnsGuard) state.tun = true;
+      // TUN/DNS are sing-box-only in this release. Never silently change the
+      // user's selected core while restoring persisted preferences.
       if ((state.tun || state.dnsGuard) && state.core !== "sing-box") {
-        state.core = "sing-box";
-        document.getElementById("core-select").value = "sing-box";
+        state.tun = false;
+        state.dnsGuard = false;
+        state.killSwitch = false;
+        addLog(t("logTunCoreOnly"), "warn");
       }
+      if (state.dnsGuard) state.tun = true;
       syncSafetyToggleUi();
       saveState();
     }
@@ -2635,13 +2660,14 @@
           addLog(t("logTunRequiresDisconnect"), "warn");
           return;
         }
+        if (tunEl.checked && state.core !== "sing-box") {
+          state.tun = false;
+          syncSafetyToggleUi();
+          addLog(t("logTunCoreOnly"), "warn");
+          return;
+        }
         state.tun = tunEl.checked;
         if (!state.tun) { state.dnsGuard = false; state.killSwitch = false; }
-        if (state.tun && state.core !== "sing-box") {
-          state.core = "sing-box";
-          document.getElementById("core-select").value = "sing-box";
-          addLog(t("logTunCoreAuto"), "info");
-        }
         syncSafetyToggleUi();
         saveState();
       });
@@ -2653,14 +2679,21 @@
           addLog(t("logTunRequiresDisconnect"), "warn");
           return;
         }
+        if (dnsEl.checked && state.core !== "sing-box") {
+          state.dnsGuard = false;
+          state.tun = false;
+          syncSafetyToggleUi();
+          addLog(t("logTunCoreOnly"), "warn");
+          return;
+        }
         state.dnsGuard = dnsEl.checked;
         if (state.dnsGuard) {
+          // DNS Leak Guard is implemented on top of the sing-box TUN path;
+          // enabling it therefore enables its required TUN dependency.
           state.tun = true;
-          if (state.core !== "sing-box") {
-            state.core = "sing-box";
-            document.getElementById("core-select").value = "sing-box";
-          }
           addLog(t("logDnsGuardEnabled"), "info");
+        } else if (!tunEl?.checked) {
+          state.tun = false;
         }
         syncSafetyToggleUi();
         saveState();

@@ -246,8 +246,10 @@ fn runtime_info(lang: Option<String>, state: State<'_, AppState>) -> Result<Runt
         capabilities: Capabilities {
             system_proxy: true,
             tun: cfg!(windows),
-            // Kill Switch is implemented for Windows TUN; still requires elevation + user toggle.
-            kill_switch: cfg!(windows),
+            // Keep disabled until the independent service, boot recovery, and Windows
+            // packet-capture acceptance matrix are complete. WFP scaffolding alone
+            // is not a production Kill Switch capability.
+            kill_switch: false,
             dns_protection: cfg!(windows),
             // Live counters via sing-box Clash API (loopback). Xray reports unavailable.
             traffic_stats: true,
@@ -293,6 +295,14 @@ fn connect_core(
     let l = lang.as_deref();
     let dns_guard = dns_guard.unwrap_or(false);
     let want_ks = kill_switch.unwrap_or(false);
+    if want_ks {
+        return Err(lmsg(
+            l,
+            "Kill Switch در این نسخه غیرفعال است و تا تکمیل آزمون‌های امنیتی ویندوز قابل استفاده نیست.",
+            "ميزة Kill Switch معطلة في هذا الإصدار حتى اكتمال اختبارات أمان Windows.",
+            "Kill Switch is disabled in this build until the Windows security validation gates are complete.",
+        ));
+    }
     let (kind, mode, normalized) = prepare_config(&core, &config_json, network_mode.as_deref(), routing_mode.as_deref(), dns_guard, l)?;
     check_mode_supported(kind.name(), mode, dns_guard, l)?;
     if mode == network::NetworkMode::Tun { tun::ensure_elevated()?; }
@@ -651,7 +661,7 @@ fn connection_status(lang: Option<String>, app: tauri::AppHandle, state: State<'
         let proxy = SystemProxy::new(&config_dir);
         let mode = *lock(&state.active_mode);
         if mode == Some(network::NetworkMode::Tun) {
-            // Real Kill Switch: on unexpected core exit keep WFP block and do not
+            // If a previously armed protection journal exists, preserve its block; do not
             // restore normal internet until explicit Disconnect or Emergency Reset.
             let ks_armed = lock(&state.kill_switch).is_armed()
                 || matches!(

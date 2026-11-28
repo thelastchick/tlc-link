@@ -8,7 +8,7 @@ This pass is intentionally limited to the existing Portable source. The previous
 
 ### System TUN (Sing-box only)
 - TUN mode is available only on Windows and only with sing-box. Xray continues to use System Proxy.
-- The frontend can select TUN while disconnected. Selecting TUN automatically selects sing-box.
+- The frontend can select TUN while disconnected only when sing-box is already selected. If Xray is selected, the UI rejects the TUN toggle and preserves Xray; it never silently changes the selected core.
 - TUN connection requires an elevated process. The user must close TLC LINK and run `TLC-LINK.exe` using **Run as administrator**. This patch does not silently relaunch or elevate the app.
 - Runtime config creates a dedicated `TLC-TUN` interface with IPv4/IPv6 addresses and explicit DNS addresses, enables `auto_route`, and sets `route.auto_detect_interface` to prevent the proxy outbound from looping back into the tunnel.
 - Startup verification checks the TLC adapter is up, checks the two IPv4 split-default routes (`0.0.0.0/1`, `128.0.0.0/1`), and performs a bounded TCP reachability probe against multiple literal-IP endpoints.

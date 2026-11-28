@@ -32,6 +32,12 @@ for (const id of ['toggle-tun', 'toggle-dns'])
   assert.ok(!new RegExp(`id="${id}"[^>]*disabled`).test(html), id + ' should be capability-gated by the native runtime');
 assert.ok(/id="toggle-ks"[^>]*disabled/.test(html), 'Kill Switch must remain disabled');
 assert.ok(js.includes('function setSafetyCapabilities') && js.includes('dnsGuard: state.dnsGuard'), 'TUN/DNS capability and invoke wiring missing');
+const safetyStart = js.indexOf('function setSafetyCapabilities');
+const safetyEnd = js.indexOf('async function emergencyNetworkReset', safetyStart);
+const safetySource = js.slice(safetyStart, safetyEnd);
+assert.ok(!/state\.core\s*=\s*['\"]sing-box['\"]/.test(safetySource), 'TUN/DNS must not silently switch the selected core');
+assert.ok(/kill_switch:\s*false/.test(fs.readFileSync('src-tauri/src/lib.rs', 'utf8')), 'Kill Switch must remain capability-disabled until release gates pass');
+assert.ok(js.includes('trafficPollGeneration') && js.includes('trafficUnavailable'), 'traffic polling must handle stale/transient API responses');
 
 // 5) redactSecrets masks credentials
 {
