@@ -1,0 +1,3 @@
+Place the official sing-box.exe in this folder.
+Required path: src-tauri/binaries/sing-box/sing-box.exe
+Do not rename unrelated binaries.

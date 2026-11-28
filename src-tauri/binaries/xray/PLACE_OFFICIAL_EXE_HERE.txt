@@ -1,0 +1,3 @@
+Place the official xray.exe in this folder.
+Required path: src-tauri/binaries/xray/xray.exe
+Do not rename unrelated binaries.

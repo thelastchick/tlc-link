@@ -1,0 +1,217 @@
+//! TLC LINK Kill Switch independent helper.
+//!
+//! Owns WFP filter lifetime so protection can outlive the UI process.
+//! Protocol: length-prefixed JSON over named pipe `\\.\pipe\tlc-ks-svc-v1`
+//! (see `tlc_link_lib::ks::protocol`).
+//!
+//! Usage (Administrator):
+//!   tlc-ks-service.exe
+//! Install as Windows service (optional):
+//!   sc create TLCKillSwitch binPath= "C:\full\path\tlc-ks-service.exe" start= auto
+//!   sc start TLCKillSwitch
+
+fn main() {
+    #[cfg(not(windows))]
+    {
+        eprintln!("tlc-ks-service is Windows-only");
+        std::process::exit(1);
+    }
+    #[cfg(windows)]
+    if let Err(e) = windows_main() {
+        eprintln!("tlc-ks-service error: {e}");
+        std::process::exit(1);
+    }
+}
+
+#[cfg(windows)]
+fn windows_main() -> Result<(), String> {
+    use std::io::{Read, Write};
+    use std::net::IpAddr;
+    use std::ptr;
+    use tlc_link_lib::ks::protocol::{KsRequest, KsResponse, PIPE_NAME, PROTOCOL_VERSION};
+    use tlc_link_lib::ks::wfp;
+    use windows_sys::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
+    use windows_sys::Win32::Storage::FileSystem::{FlushFileBuffers, ReadFile, WriteFile};
+    use windows_sys::Win32::System::Pipes::{
+        ConnectNamedPipe, CreateNamedPipeW, DisconnectNamedPipe,
+        PIPE_READMODE_BYTE, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES, PIPE_WAIT,
+    };
+    // PIPE_ACCESS_DUPLEX = 0x00000003 (duplex access to named pipe)
+    const PIPE_ACCESS_DUPLEX: u32 = 0x0000_0003;
+
+    eprintln!("TLC LINK KS service listening on {PIPE_NAME}");
+
+    loop {
+        let wide: Vec<u16> = PIPE_NAME.encode_utf16().chain(Some(0)).collect();
+        let handle: HANDLE = unsafe {
+            CreateNamedPipeW(
+                wide.as_ptr(),
+                PIPE_ACCESS_DUPLEX,
+                PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+                PIPE_UNLIMITED_INSTANCES,
+                65536,
+                65536,
+                0,
+                ptr::null(),
+            )
+        };
+        if handle == INVALID_HANDLE_VALUE || handle.is_null() {
+            return Err(format!(
+                "CreateNamedPipeW: {}",
+                std::io::Error::last_os_error()
+            ));
+        }
+        let ok = unsafe { ConnectNamedPipe(handle, ptr::null_mut()) };
+        if ok == 0 {
+            let err = std::io::Error::last_os_error();
+            // 535 = ERROR_PIPE_CONNECTED
+            if err.raw_os_error() != Some(535) {
+                unsafe { CloseHandle(handle) };
+                continue;
+            }
+        }
+
+        let mut pipe = PipeHandle { handle };
+        let mut len_buf = [0u8; 4];
+        if pipe.read_exact(&mut len_buf).is_err() {
+            continue;
+        }
+        let n = u32::from_le_bytes(len_buf) as usize;
+        if n == 0 || n > 1_000_000 {
+            continue;
+        }
+        let mut body = vec![0u8; n];
+        if pipe.read_exact(&mut body).is_err() {
+            continue;
+        }
+        let resp = match serde_json::from_slice::<KsRequest>(&body) {
+            Ok(KsRequest::Ping { version }) => {
+                if version == PROTOCOL_VERSION {
+                    KsResponse::Ok {
+                        message: "pong".into(),
+                    }
+                } else {
+                    KsResponse::Err {
+                        message: format!("protocol {version} != {PROTOCOL_VERSION}"),
+                    }
+                }
+            }
+            Ok(KsRequest::Arm {
+                port,
+                ip,
+                previous_ip,
+                ..
+            }) => match ip.parse::<IpAddr>() {
+                Ok(addr) => {
+                    let prev = previous_ip.and_then(|p| p.parse().ok());
+                    match wfp::install_protection(&addr, port, prev.as_ref()) {
+                        Ok(ids) => KsResponse::Armed {
+                            filter_ids: ids,
+                            message: "armed".into(),
+                        },
+                        Err(e) => KsResponse::Err { message: e },
+                    }
+                }
+                Err(_) => KsResponse::Err {
+                    message: "invalid ip".into(),
+                },
+            },
+            Ok(KsRequest::Release) | Ok(KsRequest::EmergencyClear) => {
+                match wfp::remove_all_tlc_objects() {
+                    Ok(n) => KsResponse::Ok {
+                        message: format!("cleared {n} objects"),
+                    },
+                    Err(e) => KsResponse::Err { message: e },
+                }
+            }
+            Ok(KsRequest::Status) => KsResponse::Status {
+                state: "running".into(),
+                armed: false,
+                generation: 0,
+                service: true,
+            },
+            Err(e) => KsResponse::Err {
+                message: format!("bad json: {e}"),
+            },
+        };
+        if let Ok(payload) = serde_json::to_vec(&resp) {
+            let len = (payload.len() as u32).to_le_bytes();
+            let _ = pipe.write_all(&len);
+            let _ = pipe.write_all(&payload);
+            let _ = pipe.flush();
+        }
+        // Drop disconnects
+    }
+}
+
+#[cfg(windows)]
+struct PipeHandle {
+    handle: windows_sys::Win32::Foundation::HANDLE,
+}
+
+#[cfg(windows)]
+impl std::io::Read for PipeHandle {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        use std::ptr;
+        use windows_sys::Win32::Storage::FileSystem::ReadFile;
+        let mut read = 0u32;
+        let ok = unsafe {
+            ReadFile(
+                self.handle,
+                buf.as_mut_ptr() as *mut _,
+                buf.len() as u32,
+                &mut read,
+                ptr::null_mut(),
+            )
+        };
+        if ok == 0 {
+            Err(std::io::Error::last_os_error())
+        } else {
+            Ok(read as usize)
+        }
+    }
+}
+
+#[cfg(windows)]
+impl std::io::Write for PipeHandle {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        use std::ptr;
+        use windows_sys::Win32::Storage::FileSystem::WriteFile;
+        let mut written = 0u32;
+        let ok = unsafe {
+            WriteFile(
+                self.handle,
+                buf.as_ptr() as *const _,
+                buf.len() as u32,
+                &mut written,
+                ptr::null_mut(),
+            )
+        };
+        if ok == 0 {
+            Err(std::io::Error::last_os_error())
+        } else {
+            Ok(written as usize)
+        }
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        use windows_sys::Win32::Storage::FileSystem::FlushFileBuffers;
+        let ok = unsafe { FlushFileBuffers(self.handle) };
+        if ok == 0 {
+            Err(std::io::Error::last_os_error())
+        } else {
+            Ok(())
+        }
+    }
+}
+
+#[cfg(windows)]
+impl Drop for PipeHandle {
+    fn drop(&mut self) {
+        use windows_sys::Win32::Foundation::CloseHandle;
+        use windows_sys::Win32::System::Pipes::DisconnectNamedPipe;
+        unsafe {
+            DisconnectNamedPipe(self.handle);
+            CloseHandle(self.handle);
+        }
+    }
+}
