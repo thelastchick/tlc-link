@@ -1,1 +1,60 @@
+name: Build TLC LINK Portable (Windows)
 
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Download official sing-box and Xray cores
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "src-tauri\binaries\sing-box", "src-tauri\binaries\xray" | Out-Null
+
+          $sbRel = Invoke-RestMethod "https://api.github.com/repos/SagerNet/sing-box/releases/latest"
+          $sbAsset = $sbRel.assets | Where-Object { $_.name -match 'windows-amd64\.zip$' } | Select-Object -First 1
+          Invoke-WebRequest $sbAsset.browser_download_url -OutFile "sb.zip"
+          Expand-Archive "sb.zip" -DestinationPath "sb_tmp" -Force
+          Get-ChildItem "sb_tmp" -Recurse -Filter "sing-box.exe" | Select-Object -First 1 | Copy-Item -Destination "src-tauri\binaries\sing-box\sing-box.exe"
+          $sbVersion = $sbRel.tag_name.TrimStart('v')
+          if ([version]$sbVersion -lt [version]'1.14.0') {
+            throw "TLC LINK TUN/DNS requires sing-box >= 1.14.0; received $sbVersion"
+          }
+
+          $xrRel = Invoke-RestMethod "https://api.github.com/repos/XTLS/Xray-core/releases/latest"
+          $xrAsset = $xrRel.assets | Where-Object { $_.name -match 'Xray-windows-64\.zip$' } | Select-Object -First 1
+          Invoke-WebRequest $xrAsset.browser_download_url -OutFile "xr.zip"
+          Expand-Archive "xr.zip" -DestinationPath "xr_tmp" -Force
+          Get-ChildItem "xr_tmp" -Recurse -Filter "xray.exe" | Select-Object -First 1 | Copy-Item -Destination "src-tauri\binaries\xray\xray.exe"
+          $xrVersion = $xrRel.tag_name.TrimStart('v')
+
+          Remove-Item "sb.zip", "xr.zip", "sb_tmp", "xr_tmp" -Recurse -Force
+
+          # Create cores.lock.json so verify-cores.ps1 passes
+          & .\scripts\verify-cores.ps1 -Pin -SingBoxVersion $sbVersion -XrayVersion $xrVersion
+
+      - name: Build and verify Portable only
+        shell: pwsh
+        run: |
+          .\scripts\build-windows.ps1
+          .\scripts\build-portable-windows.ps1
+
+      - name: Upload Portable artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: TLC-LINK-Portable-Windows
+          path: dist/TLC-LINK-Portable.zip
