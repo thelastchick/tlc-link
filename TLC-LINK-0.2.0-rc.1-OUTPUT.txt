@@ -1,0 +1,36 @@
+TLC LINK — Source output package
+================================
+File: TLC-LINK-0.2.0-rc.1-source.zip
+Version: 0.2.0-rc.1
+SHA256: 5f82a2a71b68dba57e62ea94bc436b0d561011811d9e4d7eebe89afbd30c4875
+
+What this is
+------------
+Complete improved source tree (not a Windows .exe).
+Build the portable EXE on a Windows 10/11 x64 machine.
+
+Included work in this tree
+-------------------------
+- Kill Switch hostname resolution + fail-closed
+- Multi-upstream DNS Leak Guard (Cloudflare / Google / Quad9)
+- KS startup reconcile + corrupt journal sweep
+- Live traffic meters (sing-box Clash API)
+- Manual subscription HTTP(S) refresh
+- IPv6-safe TCP latency parsing
+- VLESS packetEncoding support
+- RC docs: RC-PREPARATION, KNOWN-LIMITATIONS, RELEASE-NOTES
+
+Build on Windows (short)
+------------------------
+1. Extract zip
+2. Place official cores:
+   tlc-link-main\src-tauri\binaries\sing-box\sing-box.exe
+   tlc-link-main\src-tauri\binaries\xray\xray.exe
+3. powershell -File tlc-link-main\scripts\fetch-vendor.ps1
+4. tlc-link-main\BUILD-WINDOWS.bat
+5. Output: tlc-link-main\dist\TLC-LINK-Portable.zip
+
+Read first
+----------
+tlc-link-main\docs\RC-PREPARATION.md
+tlc-link-main\docs\KNOWN-LIMITATIONS.md

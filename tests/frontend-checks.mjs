@@ -20,7 +20,10 @@ for (const [name, text] of [['index.html', html], ['app.js', js]]) {
 // 3) CSP is strict: no unsafe-inline for scripts, no remote script/style sources
 const csp = conf.app.security.csp;
 assert.ok(/script-src 'self'(;|$)/.test(csp) && !/script-src[^;]*unsafe-inline/.test(csp));
-assert.ok(!/https?:\/\//.test(csp.replace('http://ipc.localhost', '')));
+// Remote script/style hosts are forbidden. connect-src may allow https:/http: for subscription fetch only.
+assert.ok(!/script-src[^;]*https?:/.test(csp), 'script-src must not allow remote http(s)');
+assert.ok(!/style-src[^;]*https?:/.test(csp), 'style-src must not allow remote http(s)');
+assert.ok(/connect-src[^;]*ipc:/.test(csp), 'connect-src must keep ipc');
 assert.ok(!/<script>[^<]/.test(html) && !/<style>/.test(html), 'inline script/style block present');
 
 // 4) TUN and DNS are available only when native runtime capabilities permit them;
