@@ -38,11 +38,16 @@ fn windows_main() -> Result<(), String> {
     use tlc_link_lib::ks::protocol::{KsRequest, KsResponse, PIPE_NAME, PROTOCOL_VERSION};
     use tlc_link_lib::ks::wfp;
     use windows_sys::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
-    use windows_sys::Win32::Storage::FileSystem::{FlushFileBuffers, ReadFile, WriteFile};
     use windows_sys::Win32::System::Pipes::{
-        ConnectNamedPipe, CreateNamedPipeW, DisconnectNamedPipe, PIPE_READMODE_BYTE, PIPE_TYPE_BYTE,
+        CreateNamedPipeW, DisconnectNamedPipe, PIPE_READMODE_BYTE, PIPE_TYPE_BYTE,
         PIPE_UNLIMITED_INSTANCES, PIPE_WAIT,
     };
+    // windows-sys feature layout varies across minor versions; bind the stable kernel32
+    // entry points we need so the helper binary always builds on CI.
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn ConnectNamedPipe(h: HANDLE, overlapped: *mut core::ffi::c_void) -> i32;
+    }
 
     // PIPE_ACCESS_DUPLEX = 0x00000003
     const PIPE_ACCESS_DUPLEX: u32 = 0x0000_0003;
@@ -176,18 +181,36 @@ struct PipeHandle {
 }
 
 #[cfg(windows)]
+#[link(name = "kernel32")]
+unsafe extern "system" {
+    fn ReadFile(
+        h: windows_sys::Win32::Foundation::HANDLE,
+        buf: *mut u8,
+        n: u32,
+        read: *mut u32,
+        overlapped: *mut core::ffi::c_void,
+    ) -> i32;
+    fn WriteFile(
+        h: windows_sys::Win32::Foundation::HANDLE,
+        buf: *const u8,
+        n: u32,
+        written: *mut u32,
+        overlapped: *mut core::ffi::c_void,
+    ) -> i32;
+    fn FlushFileBuffers(h: windows_sys::Win32::Foundation::HANDLE) -> i32;
+}
+
+#[cfg(windows)]
 impl std::io::Read for PipeHandle {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-        use std::ptr;
-        use windows_sys::Win32::Storage::FileSystem::ReadFile;
         let mut read = 0u32;
         let ok = unsafe {
             ReadFile(
                 self.handle,
-                buf.as_mut_ptr() as *mut _,
+                buf.as_mut_ptr(),
                 buf.len() as u32,
                 &mut read,
-                ptr::null_mut(),
+                core::ptr::null_mut(),
             )
         };
         if ok == 0 {
@@ -201,16 +224,14 @@ impl std::io::Read for PipeHandle {
 #[cfg(windows)]
 impl std::io::Write for PipeHandle {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        use std::ptr;
-        use windows_sys::Win32::Storage::FileSystem::WriteFile;
         let mut written = 0u32;
         let ok = unsafe {
             WriteFile(
                 self.handle,
-                buf.as_ptr() as *const _,
+                buf.as_ptr(),
                 buf.len() as u32,
                 &mut written,
-                ptr::null_mut(),
+                core::ptr::null_mut(),
             )
         };
         if ok == 0 {
@@ -220,7 +241,6 @@ impl std::io::Write for PipeHandle {
         }
     }
     fn flush(&mut self) -> std::io::Result<()> {
-        use windows_sys::Win32::Storage::FileSystem::FlushFileBuffers;
         let ok = unsafe { FlushFileBuffers(self.handle) };
         if ok == 0 {
             Err(std::io::Error::last_os_error())
