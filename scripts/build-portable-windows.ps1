@@ -4,7 +4,9 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $releaseDir = Join-Path $root 'src-tauri\target\release'
 $candidates = @(
     (Join-Path $releaseDir 'TLC LINK.exe'),
-    (Join-Path $releaseDir 'tlc-link.exe')
+    (Join-Path $releaseDir 'tlc-link.exe'),
+    (Join-Path $releaseDir 'TLC-LINK.exe'),
+    (Join-Path $releaseDir 'tlc_link.exe')
 )
 
 $exe = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1

@@ -4,6 +4,7 @@ version = "0.2.0-rc.1"
 description = "TLC LINK desktop VPN client"
 authors = ["The Last Chick"]
 edition = "2021"
+default-run = "tlc-link"
 
 # main.rs calls `tlc_link_lib::run()`; Tauri 2 requires the library target to be declared explicitly.
 [lib]
@@ -34,6 +35,9 @@ windows-sys = { version = "0.59", features = [
 ] }
 
 [[bin]]
+name = "tlc-link"
+path = "src/main.rs"
+
+[[bin]]
 name = "tlc-ks-service"
 path = "src/bin/tlc_ks_service.rs"
-required-features = []
