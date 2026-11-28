@@ -285,6 +285,12 @@ mod endpoint_latency_tests {
         assert!(endpoint_tcp_latency("not-an-endpoint", Duration::from_millis(500)).is_err());
         assert!(endpoint_tcp_latency("example.com:notaport", Duration::from_millis(500)).is_err());
 
+
+    }
+}
+
+#[cfg(test)]
+mod parse_host_port_tests {
     #[test]
     fn parse_host_port_supports_ipv6_brackets() {
         let (h, p) = super::parse_host_port("[2001:db8::1]:443").unwrap();
@@ -293,7 +299,5 @@ mod endpoint_latency_tests {
         let (h2, p2) = super::parse_host_port("example.com:8443").unwrap();
         assert_eq!(h2, "example.com");
         assert_eq!(p2, 8443);
-    }
-
     }
 }

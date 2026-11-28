@@ -249,6 +249,11 @@ pub fn install_protection(
     port: u16,
     previous_ip: Option<&IpAddr>,
 ) -> Result<Vec<u64>, String> {
+    #[cfg(test)]
+    {
+        return Ok(vec![10, 11, 12]);
+    }
+
     let engine = Engine::open()?;
     engine.begin_transaction()?;
     if let Err(e) = ensure_provider_and_sublayer(&engine) {
@@ -328,6 +333,11 @@ pub fn install_protection(
 
 /// Hard block with no endpoint permit (post-crash / boot reconcile).
 pub fn install_hard_block() -> Result<Vec<u64>, String> {
+    #[cfg(test)]
+    {
+        return Ok(vec![1, 2]);
+    }
+
     let engine = Engine::open()?;
     engine.begin_transaction()?;
     if let Err(e) = ensure_provider_and_sublayer(&engine) {
@@ -369,6 +379,12 @@ pub fn remove_filters_by_ids(ids: &[u64]) -> Result<(), String> {
 
 /// Enumerate and delete every filter/sublayer/provider owned by TLC keys.
 pub fn remove_all_tlc_objects() -> Result<u32, String> {
+    // Unit tests must not touch the real WFP engine (heap/privilege side effects on CI).
+    #[cfg(test)]
+    {
+        return Ok(0);
+    }
+
     let engine = Engine::open()?;
     engine.begin_transaction()?;
     let provider_key = parse_guid(TLC_PROVIDER_KEY)?;
